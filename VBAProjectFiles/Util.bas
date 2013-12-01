@@ -9,7 +9,7 @@ Function addEscapedDoubleQuotes(stringToQuote As String) As String
 End Function
 
 'Stream_StringToBinary Function
-'2003 Antonin Foller, http://www.motobit.com
+'2003 Antonin Foller, http://www.motobit.com/tips/detpg_BinASP/
 'Text - string parameter To convert To binary data
 Function Stream_StringToBinary(Text)
   Const adTypeText = 2
@@ -41,9 +41,9 @@ Function Stream_StringToBinary(Text)
 
   Set BinaryStream = Nothing
 End Function
-
+' The below is taken from http://stackoverflow.com/questions/496751/base64-encode-string-in-vbscript
 'Stream_BinaryToString Function
-'2003 Antonin Foller, http://www.motobit.com
+'2003 Antonin Foller, http://www.motobit.com/tips/detpg_binarytostring/
 'Binary - VT_UI1 | VT_ARRAY data To convert To a string
 Function Stream_BinaryToString(Binary)
   Const adTypeText = 2
@@ -73,6 +73,9 @@ Function Stream_BinaryToString(Binary)
 End Function
 
 ' The below is taken from http://stackoverflow.com/questions/496751/base64-encode-string-in-vbscript
+' Decodes a base-64 encoded string (BSTR type).
+' 1999 - 2004 Antonin Foller, http://www.motobit.com/tips/detpg_Base64Encode/
+' 1.01 - solves problem with Access And 'Compare Database' (InStr)
 Function Base64Encode(sText)
     Dim oXML, oNode
     Set oXML = CreateObject("Msxml2.DOMDocument.3.0")
@@ -83,9 +86,9 @@ Function Base64Encode(sText)
     Set oNode = Nothing
     Set oXML = Nothing
 End Function
-
+' The below is taken from http://stackoverflow.com/questions/496751/base64-encode-string-in-vbscript
 ' Decodes a base-64 encoded string (BSTR type).
-' 1999 - 2004 Antonin Foller, http://www.motobit.com
+' 1999 - 2004 Antonin Foller, http://www.motobit.com/tips/detpg_Base64/
 ' 1.01 - solves problem with Access And 'Compare Database' (InStr)
 Function Base64Decode(ByVal base64String)
   'rfc1521
