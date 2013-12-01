@@ -7,7 +7,8 @@ Attribute VB_GlobalNameSpace = False
 Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = False
 Attribute VB_Exposed = False
-' Source: https://code.google.com/p/vba-json/source/checkout
+' Source: https://code.google.com/p/vba-json/
+' BSD License: http://opensource.org/licenses/BSD-3-Clause
 
 Option Explicit
 
