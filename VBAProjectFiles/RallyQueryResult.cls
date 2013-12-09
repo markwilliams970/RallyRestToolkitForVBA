@@ -37,21 +37,73 @@ End Property
 ''''''''''''''''''''''
 ' TotalResultCount property
 ''''''''''''''''''''''
-Public Property Get TotalResultCount() As Long
-    TotalResultCount = prvTotalResultCount
+Public Property Get totalResultCount() As Long
+    totalResultCount = prvTotalResultCount
 End Property
 ''''''''''''''''''''''
 ' Results collection property
 ''''''''''''''''''''''
 Public Property Set RawResults(ByRef value As Object)
     Dim QueryResultCollection As Object
-    Dim TotalResultCount As Long
+    Dim totalResultCount As Long
     Set prvRawResults = value
     Set QueryResultCollection = prvRawResults("QueryResult")
-    TotalResultCount = QueryResultCollection("TotalResultCount")
-    prvTotalResultCount = TotalResultCount
+    totalResultCount = QueryResultCollection("TotalResultCount")
+    prvTotalResultCount = totalResultCount
     Set prvResults = QueryResultCollection("Results")
+    
+    Set QueryResultCollection = Nothing
+    
 End Property
 Public Property Get Results() As Object
     Set Results = prvResults
 End Property
+
+''''''''''''''''''''''
+' Add to Results collection property
+''''''''''''''''''''''
+Public Sub AddRawResults(ByRef value As Object)
+    Dim QueryResultCollection As Object
+    Dim theseResults As Object
+    Dim K As Variant
+    Dim Keys As Variant
+    Dim blah As String
+    Set QueryResultCollection = value("QueryResult")
+    Set theseResults = QueryResultCollection("Results")
+    
+    Call concatenateResults(theseResults)
+End Sub
+
+Private Sub concatenateResults(ByVal value As Object)
+
+    Dim thisResult As Object
+    Dim i As Long
+    Dim newResultsCollection As Collection
+    Dim existSize As Long, addedSize As Long, newResultCount As Long
+    
+    ' Added Size
+    addedSize = value.Count
+    
+    ' Existing Size
+    existSize = prvResults.Count
+    
+    ' Size of existing result set plus those being added
+    newResultCount = existSize + addedSize
+    
+    Set newResultsCollection = New Collection
+       
+    ' Concatenate Collections
+    For Each result In prvResults
+        Set thisResult = result
+        newResultsCollection.Add thisResult
+    Next
+    For Each result In value
+        Set thisResult = result
+        newResultsCollection.Add thisResult
+    Next
+
+    Set prvResults = newResultsCollection
+    Set newResultsCollection = Nothing
+    
+End Sub
+

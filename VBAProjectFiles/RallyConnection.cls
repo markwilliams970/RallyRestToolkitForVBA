@@ -78,7 +78,7 @@ Public Property Let SecurityToken(value As String)
 End Property
 
 Private Function getRallyAuthenticationURL()
-    getRallyAuthenticationURL = "https://rally1.rallydev.com/slm/webservice/" & _
+    getRallyAuthenticationURL = prvRallyUrl & "/webservice/" & _
         prvWsapiVersion & "/security/authorize"
 End Function
 ''''''''''''''''''''''
@@ -123,7 +123,6 @@ Public Function Authenticate() As Boolean
     ' Set the SubBucketID
     Call setSubBucketID
         
-    Set JSON = Nothing
     Set responseJSON = Nothing
     Set operationResult = Nothing
     Set operationErrors = Nothing
@@ -136,16 +135,24 @@ End Function
 ' http://ramblings.mcpher.com/Home/excelquirks/json/rest
 Public Function httpPost(fn As String, _
         Optional data As String = vbNullString) As String
+    Dim dataVariant As Variant
+    Dim responseString As String
+    dataVariant = data
     pHtml = fn
     Dim oHttp As Object
     Set oHttp = CreateObject("MSXML2.ServerXMLHTTP")
     With oHttp
-        .Open "PUT", pHtml, False
+        .Open "POST", pHtml, False
         .SetRequestHeader "Content-Type", "application/json"
-        .Send data
-        httpPost = .responseText
+        .SetRequestHeader "Cookie", prvSessionCookie
+        .SetRequestHeader "Content-Length", CStr(Len(data))
+        .SetRequestHeader "Authorization", "Basic " + _
+            Base64Encode(authUser + ":" + authPass)
+        .Send dataVariant
+        responseString = .responseText
         pStatus = .Status
     End With
+    httpPost = responseString
     Set oHttp = Nothing
 End Function
 
@@ -156,7 +163,7 @@ Public Function httpGET(fn As String, _
         Optional accept As String = vbNullString, _
         Optional isAuthRequest As Boolean) As String
     pHtml = fn
-    Dim responseCookie As String
+    Dim responseCookie As String, fullResponseHeaders As String
     Dim oHttp As Object
     Set oHttp = CreateObject("MSXML2.ServerXMLHTTP")
     Call oHttp.Open("GET", pHtml, False)
@@ -177,25 +184,40 @@ Public Function httpGET(fn As String, _
     httpGET = oHttp.responseText
     pStatus = oHttp.Status
     If isAuthRequest = True Then
+        fullResponseHeaders = oHttp.getAllResponseHeaders()
         responseCookie = oHttp.getResponseHeader("set-cookie")
         ' Save the session cookie
-        prvSessionCookie = responseCookie
+        prvSessionCookie = getFullSessionCookie(fullResponseHeaders)
+        MsgBox prvSessionCookie
+        
     End If
     Set oHttp = Nothing
 End Function
 
 Public Function rallyGET(fn As String) As Object
-    Dim myJsonLib As JSONLib
     Dim getResponse As String
     Dim getJSON As Object
     
     Set myJsonLib = New JSONLib
    
     getResponse = httpGET(fn, prvUserID, prvPassword)
-    Set getJSON = myJsonLib.parse(getResponse)
+    Set getJSON = JSON.parse(getResponse)
     Set rallyGET = getJSON
-    Set myJsonLib = Nothing
     Set getJSON = Nothing
+End Function
+
+Public Function rallyPOST(fn As String, workspaceRef As String, postData As String) As String
+    Dim authenticatedPostURL As String
+    Dim postResponse As String
+    
+    ' Add Authentication information
+    authenticatedPostURL = AddAuthKey(fn)
+    
+    ' Add Workspace Ref
+    authenticatedPostURL = authenticatedPostURL & "&workspace=" & workspaceRef
+   
+    postResponse = httpPost(authenticatedPostURL, postData)
+    rallyPOST = postResponse
 End Function
 
 Private Sub setSubBucketID()
@@ -216,7 +238,7 @@ Private Sub setSubBucketID()
     
     Set mySubscriptionResponse = rallyGET(mySubscriptionQueryURL)
     Set QueryResultCollection = mySubscriptionResponse("QueryResult")
-    TotalResultCount = QueryResultCollection("TotalResultCount")
+    totalResultCount = QueryResultCollection("TotalResultCount")
     Set Results = QueryResultCollection("Results")
     Set mySubscription = Results(1)
     
@@ -229,6 +251,10 @@ Private Sub setSubBucketID()
     
 End Sub
 
+Private Function AddAuthKey(fn As String) As String
+    AddAuthKey = fn & "?key=" & prvSecurityToken
+End Function
+
 Public Function TestQuery() As Object
 
     Dim myQueryUrl As String
@@ -239,4 +265,29 @@ Public Function TestQuery() As Object
     myResponse = rallyGET(myQueryUrl)
     TestQuery = myResponse
      
+End Function
+' https://gist.github.com/shimondoodkin/3398055
+Private Function getFullSessionCookie(responseHeaders As String) As String
+    Dim strHeaders, hArr, kk, theCookie
+    hArr = Split(responseHeaders, vbCrLf)
+    Dim t, p, firstpos
+    For kk = 0 To UBound(hArr) - 1
+     t = hArr(kk)
+     If Mid(t, 1, Len("Set-Cookie: ")) = "Set-Cookie: " Then
+        firstpos = Len(t)
+        p = InStr(1, t, "; Path=", vbTextCompare): If p > 0 And p < firstpos Then firstpos = p
+        p = InStr(1, t, "; Domain=", vbTextCompare): If p > 0 And p < firstpos Then firstpos = p
+        p = InStr(1, t, "; Max-Age=", vbTextCompare): If p > 0 And p < firstpos Then firstpos = p
+        p = InStr(1, t, "; Secure=", vbTextCompare): If p > 0 And p < firstpos Then firstpos = p
+        p = InStr(1, t, "; Version=", vbTextCompare): If p > 0 And p < firstpos Then firstpos = p
+        p = InStr(1, t, "; HTTPOnly", vbTextCompare): If p > 0 And p < firstpos Then firstpos = p
+        theCookie = Mid(t, Len("Set-Cookie: ") + 1, firstpos - 1 - Len("Set-Cookie: "))
+        If Cookie = "" Then
+         Cookie = theCookie
+        Else
+         Cookie = Cookie & "; " & theCookie
+        End If
+      End If
+     Next
+     getFullSessionCookie = Trim(Cookie)
 End Function

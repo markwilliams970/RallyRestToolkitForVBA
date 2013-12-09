@@ -27,6 +27,7 @@ Private Sub Class_Initialize()
     prvProjectScopeDown = False
     prvPageSize = 200
     prvRecordLimit = 99999
+    prvStart = 1
 End Sub
 
 ' Setters and Getters
@@ -87,11 +88,11 @@ End Property
 ''''''''''''''''''''''
 ' PageSize property
 ''''''''''''''''''''''
-Public Property Get PageSize() As Integer
-    PageSize = prvPageSize
+Public Property Get pageSize() As Integer
+    pageSize = prvPageSize
 End Property
 
-Public Property Let PageSize(value As Integer)
+Public Property Let pageSize(value As Integer)
     prvPageSize = value
 End Property
 ''''''''''''''''''''''
@@ -135,4 +136,15 @@ End Property
 
 Public Property Let Workspace(value As String)
     prvWorkspace = value
+End Property
+
+''''''''''''''''''''''
+' Start property
+''''''''''''''''''''''
+Public Property Get Start() As Long
+    Start = prvStart
+End Property
+
+Public Property Let Start(value As Long)
+    prvStart = value
 End Property

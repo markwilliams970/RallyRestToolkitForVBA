@@ -62,10 +62,10 @@ Private Function parseObject(ByRef str As String, ByRef Index As Long) As Object
             Call skipChar(str, Index)
         End If
         
-        Dim Key As String
+        Dim key As String
         
         ' add key/value pair
-        parseObject.Add Key:=parseKey(str, Index), Item:=parseValue(str, Index)
+        parseObject.Add key:=parseKey(str, Index), Item:=parseValue(str, Index)
         
     Loop
 
@@ -312,9 +312,9 @@ Public Function toString(ByRef obj As Variant) As String
                 Keys = obj.Keys
                 For i = 0 To obj.Count - 1
                     If bFI Then bFI = False Else toString = toString & ","
-                    Dim Key
-                    Key = Keys(i)
-                    toString = toString & """" & Key & """:" & toString(obj(Key))
+                    Dim key
+                    key = Keys(i)
+                    toString = toString & """" & key & """:" & toString(obj(key))
                 Next i
                 toString = toString & "}"
             ElseIf TypeName(obj) = "Collection" Then
