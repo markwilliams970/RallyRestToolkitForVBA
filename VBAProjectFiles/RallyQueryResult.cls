@@ -31,8 +31,8 @@ Public Property Get StartIndex() As Long
     StartIndex = prvStartIndex
 End Property
 
-Public Property Let StartIndex(value As Long)
-    prvStartIndex = value
+Public Property Let StartIndex(Value As Long)
+    prvStartIndex = Value
 End Property
 ''''''''''''''''''''''
 ' TotalResultCount property
@@ -43,10 +43,10 @@ End Property
 ''''''''''''''''''''''
 ' Results collection property
 ''''''''''''''''''''''
-Public Property Set RawResults(ByRef value As Object)
+Public Property Set RawResults(ByRef Value As Object)
     Dim QueryResultCollection As Object
     Dim totalResultCount As Long
-    Set prvRawResults = value
+    Set prvRawResults = Value
     Set QueryResultCollection = prvRawResults("QueryResult")
     totalResultCount = QueryResultCollection("TotalResultCount")
     prvTotalResultCount = totalResultCount
@@ -62,19 +62,19 @@ End Property
 ''''''''''''''''''''''
 ' Add to Results collection property
 ''''''''''''''''''''''
-Public Sub AddRawResults(ByRef value As Object)
+Public Sub AddRawResults(ByRef Value As Object)
     Dim QueryResultCollection As Object
     Dim theseResults As Object
     Dim K As Variant
-    Dim Keys As Variant
+    Dim keys As Variant
     Dim blah As String
-    Set QueryResultCollection = value("QueryResult")
+    Set QueryResultCollection = Value("QueryResult")
     Set theseResults = QueryResultCollection("Results")
     
     Call concatenateResults(theseResults)
 End Sub
 
-Private Sub concatenateResults(ByVal value As Object)
+Private Sub concatenateResults(ByVal Value As Object)
 
     Dim thisResult As Object
     Dim i As Long
@@ -82,7 +82,7 @@ Private Sub concatenateResults(ByVal value As Object)
     Dim existSize As Long, addedSize As Long, newResultCount As Long
     
     ' Added Size
-    addedSize = value.Count
+    addedSize = Value.Count
     
     ' Existing Size
     existSize = prvResults.Count
@@ -97,7 +97,7 @@ Private Sub concatenateResults(ByVal value As Object)
         Set thisResult = result
         newResultsCollection.Add thisResult
     Next
-    For Each result In value
+    For Each result In Value
         Set thisResult = result
         newResultsCollection.Add thisResult
     Next

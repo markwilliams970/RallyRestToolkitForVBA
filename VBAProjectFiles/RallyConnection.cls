@@ -34,8 +34,8 @@ End Sub
 Public Property Get RallyUrl() As String
     RallyUrl = prvRallyUrl
 End Property
-Public Property Let RallyUrl(value As String)
-    prvRallyUrl = value
+Public Property Let RallyUrl(Value As String)
+    prvRallyUrl = Value
 End Property
 
 ''''''''''''''''''''''
@@ -44,8 +44,8 @@ End Property
 Public Property Get UserID() As String
     UserID = prvUserID
 End Property
-Public Property Let UserID(value As String)
-    prvUserID = value
+Public Property Let UserID(Value As String)
+    prvUserID = Value
 End Property
 
 ''''''''''''''''''''''
@@ -54,8 +54,8 @@ End Property
 Public Property Get Password() As String
     RallyPassword = prvPassword
 End Property
-Public Property Let Password(value As String)
-    prvPassword = value
+Public Property Let Password(Value As String)
+    prvPassword = Value
 End Property
 
 ''''''''''''''''''''''
@@ -64,8 +64,8 @@ End Property
 Public Property Get WsapiVersion() As String
     WsapiVersion = prvWsapiVersion
 End Property
-Public Property Let WsapiVersion(value As String)
-    prvWsapiVersion = value
+Public Property Let WsapiVersion(Value As String)
+    prvWsapiVersion = Value
 End Property
 ''''''''''''''''''''''
 ' prvRallyAuthKey property
@@ -73,8 +73,8 @@ End Property
 Public Property Get SecurityToken() As String
     SecurityToken = prvSecurityToken
 End Property
-Public Property Let SecurityToken(value As String)
-    prvSecurityToken = value
+Public Property Let SecurityToken(Value As String)
+    prvSecurityToken = Value
 End Property
 
 Private Function getRallyAuthenticationURL()
@@ -87,8 +87,8 @@ End Function
 Public Property Get SessionCookie() As String
     SessionCookie = prvSessionCookie
 End Property
-Public Property Let SessionCookie(value As String)
-    prvSessionCookie = value
+Public Property Let SessionCookie(Value As String)
+    prvSessionCookie = Value
 End Property
 
 Public Function Authenticate() As Boolean
@@ -197,8 +197,6 @@ End Function
 Public Function rallyGET(fn As String) As Object
     Dim getResponse As String
     Dim getJSON As Object
-    
-    Set myJsonLib = New JSONLib
    
     getResponse = httpGET(fn, prvUserID, prvPassword)
     Set getJSON = JSON.parse(getResponse)
@@ -206,9 +204,13 @@ Public Function rallyGET(fn As String) As Object
     Set getJSON = Nothing
 End Function
 
-Public Function rallyPOST(fn As String, workspaceRef As String, postData As String) As String
+Public Function rallyPOST(fn As String, workspaceRef As String, postData As String) As Object
     Dim authenticatedPostURL As String
     Dim postResponse As String
+    Dim postResponseJSON As Object
+    Dim myJSON As Object
+    
+    Set myJSON = New JSONLib
     
     ' Add Authentication information
     authenticatedPostURL = AddAuthKey(fn)
@@ -217,7 +219,9 @@ Public Function rallyPOST(fn As String, workspaceRef As String, postData As Stri
     authenticatedPostURL = authenticatedPostURL & "&workspace=" & workspaceRef
    
     postResponse = httpPost(authenticatedPostURL, postData)
-    rallyPOST = postResponse
+    Set postResponseJSON = myJSON.parse(postResponse)
+    Set rallyPOST = postResponseJSON
+    Set postResponseJSON = Nothing
 End Function
 
 Private Sub setSubBucketID()

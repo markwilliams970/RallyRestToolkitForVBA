@@ -26,8 +26,8 @@ Public Property Get queryString() As String
     queryString = prvQueryString
 End Property
 
-Public Property Let queryString(value As String)
-    prvQueryString = value
+Public Property Let queryString(Value As String)
+    prvQueryString = Value
 End Property
 ' Adds an AND condition to the Query
 Public Function AddAnd(newCondition As String)

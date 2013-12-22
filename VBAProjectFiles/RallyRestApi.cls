@@ -33,18 +33,18 @@ End Property
 Public Property Get RallyConnection() As RallyConnection
     Set RallyConnection = prvRallyConnection
 End Property
-Public Property Let RallyConnection(value As RallyConnection)
-    Set prvRallyConnection = value
+Public Property Let RallyConnection(Value As RallyConnection)
+    Set prvRallyConnection = Value
 End Property
 
-Public Property Let RallyRequest(value As RallyRequest)
-    Set prvRallyRequest = value
+Public Property Let RallyRequest(Value As RallyRequest)
+    Set prvRallyRequest = Value
 End Property
 Public Property Get RallyRequest() As RallyRequest
     Set RallyRequest = prvRallyRequest
 End Property
 
-Public Function Query(value As RallyRequest) As RallyQueryResult
+Public Function Query(Value As RallyRequest) As RallyQueryResult
 
     Dim queryResponse As Object
     Dim resultCollection As Object
@@ -54,7 +54,7 @@ Public Function Query(value As RallyRequest) As RallyQueryResult
     Dim myTotalResultCount As Long, nPages As Long, i As Long
     
     ' Set private reference to RallyRequest
-    Set myRallyRequest = value
+    Set myRallyRequest = Value
     
     ' Build Query URL
     queryUrl = buildQueryUrl(myRallyRequest)
@@ -93,14 +93,14 @@ Public Function Query(value As RallyRequest) As RallyQueryResult
 
 End Function
 
-Private Function buildQueryUrl(value As RallyRequest) As String
+Private Function buildQueryUrl(Value As RallyRequest) As String
 
     Dim queryString As String
     Dim myRallyRequest As RallyRequest
     Dim myRallyQuery As RallyQuery
     Dim myRallyQueryUrl As String
     
-    Set myRallyRequest = value
+    Set myRallyRequest = Value
     
     myRallyQueryUrl = webServiceUrl() & "/" & myRallyRequest.ArtifactName & "?query=" & _
         myRallyRequest.Query.queryString
@@ -125,14 +125,15 @@ Private Function buildQueryUrl(value As RallyRequest) As String
     buildQueryUrl = myRallyQueryUrl
 End Function
 
-Public Function Create(ArtifactType As String, workspaceRef As String, value As RallyObject) As String
+Public Function Create(ArtifactType As String, workspaceRef As String, Value As RallyObject) As RallyCreateResult
     Dim myRallyCreateUrl As String
     Dim myRallyObjectJSON As Object
     Dim myCreateObject As Object
     Dim myCreateJSON As String, myURLEncodedJSON As String
-    Dim myCreateResponse As String
+    Dim myCreateResponse As Object
+    Dim myCreateResult As RallyCreateResult
     
-    Set myRallyObject = value.JSONObject
+    Set myRallyObject = Value.JSONObject
     
     Set myCreateObject = CreateObject("Scripting.Dictionary")
     myCreateObject.Add key:=ArtifactType, Item:=myRallyObject
@@ -142,8 +143,12 @@ Public Function Create(ArtifactType As String, workspaceRef As String, value As 
     
     myRallyCreateUrl = buildCreateUrl(ArtifactType)
     
-    myCreateResponse = prvRallyConnection.rallyPOST(myRallyCreateUrl, workspaceRef, myCreateJSON)
-    Create = myCreateResponse
+    Set myCreateResponse = prvRallyConnection.rallyPOST(myRallyCreateUrl, workspaceRef, myCreateJSON)
+    
+    ' Populate Result object
+    Set myCreateResult = New RallyCreateResult
+    Set myCreateResult.RawResult = myCreateResponse
+    Set Create = myCreateResult
 
 End Function
 

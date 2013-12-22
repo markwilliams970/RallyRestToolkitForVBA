@@ -40,8 +40,8 @@ Public Property Get ArtifactName() As String
     ArtifactName = prvArtifactName
 End Property
 
-Public Property Let ArtifactName(value As String)
-    prvArtifactName = value
+Public Property Let ArtifactName(Value As String)
+    prvArtifactName = Value
 End Property
 ''''''''''''''''''''''
 ' Query property
@@ -50,8 +50,8 @@ Public Property Get Query() As RallyQuery
     Set Query = prvQuery
 End Property
 
-Public Property Set Query(ByRef value As RallyQuery)
-    Set prvQuery = value
+Public Property Set Query(ByRef Value As RallyQuery)
+    Set prvQuery = Value
 End Property
 
 ''''''''''''''''''''''
@@ -61,8 +61,8 @@ Public Property Get Fetch() As String
     Fetch = prvFetch
 End Property
 
-Public Property Let Fetch(value As String)
-    prvFetch = value
+Public Property Let Fetch(Value As String)
+    prvFetch = Value
 End Property
 
 ''''''''''''''''''''''
@@ -72,8 +72,8 @@ Public Property Get ProjectScopeUp() As Boolean
     ProjectScopeUp = prvProjectScopeUp
 End Property
 
-Public Property Let ProjectScopeUp(value As Boolean)
-    prvProjectScopeUp = value
+Public Property Let ProjectScopeUp(Value As Boolean)
+    prvProjectScopeUp = Value
 End Property
 ''''''''''''''''''''''
 ' ProjectScopeDown property
@@ -82,8 +82,8 @@ Public Property Get ProjectScopeDown() As Boolean
     ProjectScopeDown = prvProjectScopeDown
 End Property
 
-Public Property Let ProjectScopeDown(value As Boolean)
-    prvProjectScopeDown = value
+Public Property Let ProjectScopeDown(Value As Boolean)
+    prvProjectScopeDown = Value
 End Property
 ''''''''''''''''''''''
 ' PageSize property
@@ -92,8 +92,8 @@ Public Property Get pageSize() As Integer
     pageSize = prvPageSize
 End Property
 
-Public Property Let pageSize(value As Integer)
-    prvPageSize = value
+Public Property Let pageSize(Value As Integer)
+    prvPageSize = Value
 End Property
 ''''''''''''''''''''''
 ' Project property
@@ -102,8 +102,8 @@ Public Property Get Project() As String
     Project = prvProject
 End Property
 
-Public Property Let Project(value As String)
-    prvProject = value
+Public Property Let Project(Value As String)
+    prvProject = Value
 End Property
 
 ''''''''''''''''''''''
@@ -113,8 +113,8 @@ Public Property Get RecordLimit() As Integer
     RecordLimit = prvRecordLimit
 End Property
 
-Public Property Let RecordLimit(value As Integer)
-    prvRecordLimit = value
+Public Property Let RecordLimit(Value As Integer)
+    prvRecordLimit = Value
 End Property
 ''''''''''''''''''''''
 ' Order property
@@ -123,8 +123,8 @@ Public Property Get Order() As String
     Order = prvOrder
 End Property
 
-Public Property Let Order(value As String)
-    prvOrder = value
+Public Property Let Order(Value As String)
+    prvOrder = Value
 End Property
 
 ''''''''''''''''''''''
@@ -134,8 +134,8 @@ Public Property Get Workspace() As String
     Workspace = prvWorkspace
 End Property
 
-Public Property Let Workspace(value As String)
-    prvWorkspace = value
+Public Property Let Workspace(Value As String)
+    prvWorkspace = Value
 End Property
 
 ''''''''''''''''''''''
@@ -145,6 +145,6 @@ Public Property Get Start() As Long
     Start = prvStart
 End Property
 
-Public Property Let Start(value As Long)
-    prvStart = value
+Public Property Let Start(Value As Long)
+    prvStart = Value
 End Property

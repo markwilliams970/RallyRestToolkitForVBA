@@ -12,10 +12,15 @@ Public Sub TestRest()
     Dim myRallyAuthKey As String
     Dim myRallySessionCookie As String
     Dim myQueryResult As RallyQueryResult
-    Dim myQueryResultObject As Object
+    Dim myQueryResultObject As Object, myQueryResultString As String
+    Dim myCreateResult As RallyCreateResult
+    Dim myCreateResultObject As Object, myCreatedRef As String, myCreatedObjectID As String
+    Dim myCreateResultString As String
     Dim myResults As Object
     Dim myResultString As String
     Dim myNewDefect As RallyObject
+
+    Dim currentDateTime As Date, currentDateTimeString As String
     
     Dim blah As String
     
@@ -72,14 +77,22 @@ Public Sub TestRest()
     
     MsgBox myResultsString
     
+    ' Get Current Time
+    currentDateTime = Now()
+    currentDateTimeString = Format(currentDateTime, "yyyy-MM-ddThh:mm")
+    
     Set myNewDefect = New RallyObject
-    Call myNewDefect.AddProperty("Name", "My Defect from VBA")
+    Call myNewDefect.AddProperty("Name", "My Defect from VBA: " & currentDateTimeString)
     Call myNewDefect.AddProperty("Severity", "Major Problem")
     Call myNewDefect.AddProperty("Priority", "Resolve Immediately")
     
-    blah = myRallyRestApi.Create("defect", myWorkspaceRef, myNewDefect)
+    Set myCreateResult = myRallyRestApi.Create("defect", myWorkspaceRef, myNewDefect)
+    If myCreateResult.WasSuccessful Then
+        Set myCreateResultObject = myCreateResult.CreatedItem
+        myCreatedRef = myCreateResult.Ref
+        myCreatedObjectID = myCreateResult.ObjectID
+    End If
     
     blah = "blah"
-
 
 End Sub
