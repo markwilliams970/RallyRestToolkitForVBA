@@ -2,7 +2,7 @@ VERSION 1.0 CLASS
 BEGIN
   MultiUse = -1  'True
 END
-Attribute VB_Name = "RallyCreateResult"
+Attribute VB_Name = "RallyOperationResult"
 Attribute VB_GlobalNameSpace = False
 Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = False
@@ -10,10 +10,10 @@ Attribute VB_Exposed = False
 ' Class Attributes
 Dim prvErrors As Object
 Dim prvWarnings As Object
-Dim prvCreatedObject As Object
+Dim prvUpdatedObject As Object
 Dim prvRawResult As Object
-Dim prvCreateResult As Object
-Dim prvCreatedItem As Object
+Dim prvOperationResult As Object
+Dim prvUpdatedItem As Object
 Dim prvRef As String, prvObjectID As String
 Dim prvWasSuccessful As Boolean
 
@@ -53,18 +53,18 @@ End Property
 ' Results collection property
 ''''''''''''''''''''''
 Public Property Set RawResult(ByVal Value As Object)
-    Dim CreateResultCollection As Object
+    Dim OperationResultCollection As Object
     Dim Errors As Object
     Dim Warnings As Object
     
     Set prvRawResult = Value
-    Set CreateResultCollection = prvRawResult("CreateResult")
-    Set Errors = CreateResultCollection("Errors")
-    Set Warnings = CreateResultCollection("Warnings")
+    Set OperationResultCollection = prvRawResult("OperationResult")
+    Set Errors = OperationResultCollection("Errors")
+    Set Warnings = OperationResultCollection("Warnings")
     If Errors.Count = 0 Then
-        Set prvCreatedItem = CreateResultCollection("Object")
-        prvRef = prvCreatedItem("_ref")
-        prvObjectID = prvCreatedItem("ObjectID")
+        Set prvUpdatedItem = OperationResultCollection("Object")
+        prvRef = prvUpdatedItem("_ref")
+        prvObjectID = prvUpdatedItem("ObjectID")
         prvWasSuccessful = True
     Else
         Set prvErrors = Errors
@@ -73,12 +73,12 @@ Public Property Set RawResult(ByVal Value As Object)
         Set prvWarnings = Warnings
     End If
     
-    Set prvCreateResult = CreateResultCollection
-    Set CreateResultCollection = Nothing
+    Set prvOperationResult = OperationResultCollection
+    Set OperationResultCollection = Nothing
     
 End Property
-Public Property Get CreatedItem() As Object
-    Set CreatedItem = prvCreatedItem
+Public Property Get UpdatedItem() As Object
+    Set UpdatedItem = prvUpdatedItem
 End Property
 Public Property Get WasSuccessful() As Boolean
     WasSuccessful = prvWasSuccessful
@@ -89,5 +89,3 @@ End Property
 Public Property Get ObjectID() As String
     ObjectID = prvObjectID
 End Property
-
-

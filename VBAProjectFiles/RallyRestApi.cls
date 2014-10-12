@@ -43,6 +43,146 @@ End Property
 Public Property Get RallyRequest() As RallyRequest
     Set RallyRequest = prvRallyRequest
 End Property
+Public Function findWorkspace(WorkspaceName As String) As Object
+
+    Dim queryResponse As Object
+    Dim subscriptionResult As Object
+    Dim workspaceCollection As Object, workspacesRef As String, workspacesQueryUrl As String
+    Dim queryUrl As String
+    Dim mySubscriptionRequest As RallyRequest, myWorkspacesRequest As RallyRequest
+    Dim myWorkspacesResults As Object, foundWorkspace As Object
+
+    Dim myQueryResult As RallyQueryResult
+    Dim myTotalResultCount As Long, nPages As Long, i As Long, pageSize As Long, start As Long
+    
+    ' Query Subscription Object
+    Set mySubscriptionRequest = New RallyRequest
+    mySubscriptionRequest.ArtifactName = "subscription"
+    
+    ' Build Query URL
+    queryUrl = buildQueryUrl(mySubscriptionRequest)
+    
+    ' Query Rally
+    Set queryResponse = prvRallyConnection.rallyGET(queryUrl)
+
+    ' Get Subscription Object
+    Set subscriptionResult = queryResponse("Subscription")
+    
+    ' Get Workspaces Collection Object
+    Set workspaceCollection = subscriptionResult("Workspaces")
+    
+    ' Get Workspaces Ref
+    workspacesRef = workspaceCollection("_ref")
+    
+    ' Query URL
+    workspacesQueryUrl = workspacesRef & "?fetch=true"
+    
+    ' Request Workspaces Collection
+    Set queryResponse = prvRallyConnection.rallyGET(workspacesQueryUrl)
+    
+    ' Populate Result object
+    Set myQueryResult = New RallyQueryResult
+    Set myQueryResult.RawResults = queryResponse
+    
+    ' Find out how many pages are in result set
+    pageSize = 20
+    Set resultCollection = queryResponse("QueryResult")
+    myTotalResultCount = resultCollection("TotalResultCount")
+    nPages = myTotalResultCount / pageSize
+    
+    ' If we have multiple pages, page through and collect entire result set
+    If nPages > 1 Then
+        For i = 2 To nPages
+            ' Set Start to next page
+            start = pageSize * (i - 1) + 1
+            
+            ' Build Query URL
+            workspacesQueryUrl = workspacesRef & "?fetch=true&start=" & start
+            
+            ' Query Rally
+            Set queryResponse = prvRallyConnection.rallyGET(queryUrl)
+    
+            ' Update Result object
+            Call myQueryResult.AddRawResults(queryResponse)
+        Next i
+        Set queryResponse = Nothing
+    End If
+    
+    Set myWorkspacesResults = myQueryResult.Results
+     
+    For Each workspaceResult In myWorkspacesResults
+        If workspaceResult("Name") = WorkspaceName Then
+            Set foundWorkspace = workspaceResult
+            Exit For
+        End If
+    Next
+    
+    Set findWorkspace = foundWorkspace
+
+End Function
+
+Public Function findProject(RallyWorkspace As Object, ProjectName As String) As Object
+
+    Dim queryResponse As Object
+    Dim projectsCollection As Object, projectsRef As String, projectsQueryUrl As String
+    Dim queryUrl As String
+    Dim myProjectsResults As Object, foundProject As Object
+
+    Dim myQueryResult As RallyQueryResult
+    Dim myTotalResultCount As Long, nPages As Long, i As Long, pageSize As Long, start As Long
+    
+    ' Get Projects Collection Object
+    Set projectsCollection = RallyWorkspace("Projects")
+    
+    ' Get Projects Ref
+    projectsRef = projectsCollection("_ref")
+    
+    ' Query URL
+    projectsQueryUrl = projectsRef & "?fetch=true"
+    
+    ' Request Projects Collection
+    Set queryResponse = prvRallyConnection.rallyGET(projectsQueryUrl)
+    
+    ' Populate Result object
+    Set myQueryResult = New RallyQueryResult
+    Set myQueryResult.RawResults = queryResponse
+    
+    ' Find out how many pages are in result set
+    pageSize = 20
+    Set resultCollection = queryResponse("QueryResult")
+    myTotalResultCount = resultCollection("TotalResultCount")
+    nPages = myTotalResultCount / pageSize
+    
+    ' If we have multiple pages, page through and collect entire result set
+    If nPages > 1 Then
+        For i = 2 To nPages
+            ' Set Start to next page
+            start = pageSize * (i - 1) + 1
+            
+            ' Build Query URL
+            projectsQueryUrl = projectsRef & "?fetch=true&start=" & start
+            
+            ' Query Rally
+            Set queryResponse = prvRallyConnection.rallyGET(queryUrl)
+    
+            ' Update Result object
+            Call myQueryResult.AddRawResults(queryResponse)
+        Next i
+        Set queryResponse = Nothing
+    End If
+    
+    Set myProjectsResults = myQueryResult.Results
+     
+    For Each projectResult In myProjectsResults
+        If projectResult("Name") = ProjectName Then
+            Set foundProject = projectResult
+            Exit For
+        End If
+    Next
+    
+    Set findProject = foundProject
+
+End Function
 
 Public Function Query(Value As RallyRequest) As RallyQueryResult
 
@@ -75,7 +215,7 @@ Public Function Query(Value As RallyRequest) As RallyQueryResult
     If nPages > 1 Then
         For i = 2 To nPages
             ' Set Start to next page
-            myRallyRequest.Start = myRallyRequest.pageSize * (i - 1) + 1
+            myRallyRequest.start = myRallyRequest.pageSize * (i - 1) + 1
             
             ' Build Query URL
             queryUrl = buildQueryUrl(myRallyRequest)
@@ -99,26 +239,70 @@ Private Function buildQueryUrl(Value As RallyRequest) As String
     Dim myRallyRequest As RallyRequest
     Dim myRallyQuery As RallyQuery
     Dim myRallyQueryUrl As String
+    Dim queryParams() As String, paramsString As String
+    Dim nParams As Integer, i As Integer
     
     Set myRallyRequest = Value
     
-    myRallyQueryUrl = webServiceUrl() & "/" & myRallyRequest.ArtifactName & "?query=" & _
-        myRallyRequest.Query.queryString
+    myRallyQueryUrl = webServiceUrl() & "/" & myRallyRequest.ArtifactName
         
-    If Not IsNull(myRallyRequest.Fetch) Then
-        myRallyQueryUrl = myRallyQueryUrl & "&fetch=" & myRallyRequest.Fetch
+    nParams = 0
+    If myRallyRequest.HasQuery() Then
+        If Not IsNull(myRallyRequest.Query.queryString) And myRallyRequest.Query.queryString <> "" Then
+            thisParam = "query=" & myRallyRequest.Query.queryString
+            ReDim Preserve queryParams(nParams) As String
+            queryParams(nParams) = thisParam
+            nParams = nParams + 1
+        End If
     End If
-    If Not IsNull(myRallyRequest.Workspace) Then
-        myRallyQueryUrl = myRallyQueryUrl & "&workspace=" & myRallyRequest.Workspace
+    
+    If Not IsNull(myRallyRequest.Fetch) And myRallyRequest.Fetch <> "" Then
+        thisParam = "fetch=" & myRallyRequest.Fetch
+        ReDim Preserve queryParams(nParams) As String
+        queryParams(nParams) = thisParam
+        nParams = nParams + 1
     End If
-    If Not IsNull(myRallyRequest.Project) Then
-        myRallyQueryUrl = myRallyQueryUrl & "&project=" & myRallyRequest.Project
+    
+    If Not IsNull(myRallyRequest.Workspace) And myRallyRequest.Workspace <> "" Then
+        thisParam = "workspace=" & myRallyRequest.Workspace
+        ReDim Preserve queryParams(nParams) As String
+        queryParams(nParams) = thisParam
+        nParams = nParams + 1
     End If
+    
+    If Not IsNull(myRallyRequest.Project) And myRallyRequest.Project <> "" Then
+        thisParam = "project=" & myRallyRequest.Project
+        ReDim Preserve queryParams(nParams) As String
+        queryParams(nParams) = thisParam
+        nParams = nParams + 1
+    End If
+    
     If Not IsNull(myRallyRequest.pageSize) Then
-        myRallyQueryUrl = myRallyQueryUrl & "&pagesize=" & myRallyRequest.pageSize
+        thisParam = "pagesize=" & CStr(myRallyRequest.pageSize)
+        ReDim Preserve queryParams(nParams) As String
+        queryParams(nParams) = thisParam
+        nParams = nParams + 1
     End If
-    If Not IsNull(myRallyRequest.Start) Then
-        myRallyQueryUrl = myRallyQueryUrl & "&start=" & myRallyRequest.Start
+    
+    If Not IsNull(myRallyRequest.start) Then
+        thisParam = "start=" & CStr(myRallyRequest.start)
+        ReDim Preserve queryParams(nParams) As String
+        queryParams(nParams) = thisParam
+        nParams = nParams + 1
+    End If
+    
+    i = 0
+    For Each param In queryParams
+        If i = 0 Then
+            paramsString = queryParams(i)
+        Else
+            paramsString = paramsString & "&" & queryParams(i)
+        End If
+        i = i + 1
+    Next
+    
+    If nParams > 0 Then
+        myRallyQueryUrl = myRallyQueryUrl & "?" & paramsString
     End If
         
     urlEncodedQueryUrl = URLEncode(myRallyQueryUrl)
@@ -127,11 +311,13 @@ End Function
 
 Public Function Create(ArtifactType As String, workspaceRef As String, Value As RallyObject) As RallyCreateResult
     Dim myRallyCreateUrl As String
-    Dim myRallyObjectJSON As Object
+    Dim myRallyObject As Object
     Dim myCreateObject As Object
-    Dim myCreateJSON As String, myURLEncodedJSON As String
+    Dim myCreateJSON As String, myURLEncodedJSON As String, _
+        authFailure As String, myErrorString As String
     Dim myCreateResponse As Object
     Dim myCreateResult As RallyCreateResult
+    Dim myCreateErrors As Object
     
     Set myRallyObject = Value.JSONObject
     
@@ -144,11 +330,42 @@ Public Function Create(ArtifactType As String, workspaceRef As String, Value As 
     myRallyCreateUrl = buildCreateUrl(ArtifactType)
     
     Set myCreateResponse = prvRallyConnection.rallyPOST(myRallyCreateUrl, workspaceRef, myCreateJSON)
-    
+        
     ' Populate Result object
     Set myCreateResult = New RallyCreateResult
     Set myCreateResult.RawResult = myCreateResponse
+    
+    ' Check to see if we failed to authenticate - if so, re-authenticate and retry create
+    authFailure = "Not authorized to perform action: Invalid key"
+    
+    If myCreateResult.WasSuccessful <> True Then
+        Set myCreateErrors = myCreateResult.Errors
+        myErrorString = ""
+        For Each thisError In myCreateErrors
+            myErrorString = myErrorString & thisError
+        Next
+        If myErrorString = authFailure Then
+        
+            Set myCreateResponse = Nothing
+            Set myCreateResult = Nothing
+            
+            prvRallyConnection.Authenticate
+            
+            Set myCreateResponse = prvRallyConnection.rallyPOST(myRallyCreateUrl, workspaceRef, myCreateJSON)
+        
+            ' Populate Result object
+            Set myCreateResult = New RallyCreateResult
+            Set myCreateResult.RawResult = myCreateResponse
+        End If
+    End If
+    
     Set Create = myCreateResult
+    
+    Set myRallyObject = Nothing
+    Set myCreateObject = Nothing
+    Set myCreateResponse = Nothing
+    Set myCreateResult = Nothing
+
 
 End Function
 
@@ -157,4 +374,37 @@ Private Function buildCreateUrl(ArtifactType As String) As String
     
     myRallyCreateUrl = webServiceUrl() & "/" & ArtifactType & "/create"
     buildCreateUrl = myRallyCreateUrl
+End Function
+
+Public Function Update(ArtifactRef As String, Value As RallyObject) As RallyOperationResult
+    Dim myRallyUpdateUrl As String
+    Dim myRallyObject, myRallyFields As Object
+    Dim myUpdateFields As Object
+    Dim myUpdateJSON As String, myURLEncodedJSON As String, _
+        authFailure As String, myErrorString As String
+    Dim myUpdateResponse As Object
+    Dim myUpdateResult As RallyOperationResult
+    Dim myUpdateErrors As Object
+    
+    Set myRallyObject = Value.JSONObject
+    
+    ' need to work out the "double-wrapper"
+    ' i.e., we'll receive fields as key value pairs only
+    ' But these will need to be wrapped up
+    ' in the artifact type JSON: {"task":{"Name":"My Task"}}
+    
+    Set myRallyObject = CreateObject("Scripting.Dictionary")
+    myRallyObject.Add key:=ArtifactType, Item:=myRallyObject
+    
+    myUpdateJSON = JSON.toString(myRallyObject)
+    myURLEncodedJSON = URLEncode(myUpdateJSON)
+    
+    ' TODO: BUILD UPDATE URL FUNCTION
+    ' myRallyUpdateUrl = buildUpdateUrl(ArtifactRef)
+
+
+End Function
+
+Private Function GetTypeFromRef(Ref As String)
+
 End Function

@@ -94,7 +94,7 @@ End Property
 Public Function Authenticate() As Boolean
     Dim rallyAuthUrl As String
     Dim responseBody As String
-    Dim responseJSON As Object, operationResult As Object, operationErrors As Object
+    Dim responseJSON As Object, OperationResult As Object, operationErrors As Object
     Dim numberErrors As Integer
     Dim SecurityToken As String
     Dim SessionCookie As String
@@ -111,11 +111,11 @@ Public Function Authenticate() As Boolean
     
     ' Parse the resulting response
     Set responseJSON = JSON.parse(responseBody)
-    Set operationResult = responseJSON("OperationResult")
-    Set operationErrors = operationResult("Errors")
+    Set OperationResult = responseJSON("OperationResult")
+    Set operationErrors = OperationResult("Errors")
     
     numberErrors = operationErrors.Count
-    SecurityToken = operationResult("SecurityToken")
+    SecurityToken = OperationResult("SecurityToken")
     
     ' Save the security token
     prvSecurityToken = SecurityToken
@@ -124,7 +124,7 @@ Public Function Authenticate() As Boolean
     Call setSubBucketID
         
     Set responseJSON = Nothing
-    Set operationResult = Nothing
+    Set OperationResult = Nothing
     Set operationErrors = Nothing
     If numberErrors = 0 Then
         isAuthenticated = True
@@ -137,6 +137,7 @@ Public Function httpPost(fn As String, _
         Optional data As String = vbNullString) As String
     Dim dataVariant As Variant
     Dim responseString As String
+    
     dataVariant = data
     pHtml = fn
     Dim oHttp As Object
@@ -146,8 +147,7 @@ Public Function httpPost(fn As String, _
         .SetRequestHeader "Content-Type", "application/json"
         .SetRequestHeader "Cookie", prvSessionCookie
         .SetRequestHeader "Content-Length", CStr(Len(data))
-        .SetRequestHeader "Authorization", "Basic " + _
-            Base64Encode(authUser + ":" + authPass)
+        .SetRequestHeader "Connection", "Keep-Alive"
         .Send dataVariant
         responseString = .responseText
         pStatus = .Status
@@ -166,7 +166,9 @@ Public Function httpGET(fn As String, _
     Dim responseCookie As String, fullResponseHeaders As String
     Dim oHttp As Object
     Set oHttp = CreateObject("MSXML2.ServerXMLHTTP")
-    Call oHttp.Open("GET", pHtml, False)
+    With oHttp
+        .Open "GET", pHtml, False
+    End With
     If (authUser <> vbNullString) Then
     ' need to do basic authentication
     ' acknowledgement to http://pastie.org/1192157
@@ -174,6 +176,7 @@ Public Function httpGET(fn As String, _
         oHttp.SetRequestHeader "Accept", "application/json"
         oHttp.SetRequestHeader "Authorization", "Basic " + _
             Base64Encode(authUser + ":" + authPass)
+        oHttp.SetRequestHeader "Connection", "Keep-Alive"
     End If
     
     ' some times we need to set the accept header
@@ -188,8 +191,6 @@ Public Function httpGET(fn As String, _
         responseCookie = oHttp.getResponseHeader("set-cookie")
         ' Save the session cookie
         prvSessionCookie = getFullSessionCookie(fullResponseHeaders)
-        MsgBox prvSessionCookie
-        
     End If
     Set oHttp = Nothing
 End Function

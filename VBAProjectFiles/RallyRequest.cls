@@ -19,6 +19,7 @@ Private prvOrder As String
 Private prvQuery As RallyQuery
 Private prvWorkspace As String
 Private prvProject As String
+Private prvHasQuery As Boolean
 
 ' Class Constructor
 Private Sub Class_Initialize()
@@ -28,6 +29,7 @@ Private Sub Class_Initialize()
     prvPageSize = 200
     prvRecordLimit = 99999
     prvStart = 1
+    prvHasQuery = False
 End Sub
 
 ' Setters and Getters
@@ -52,6 +54,7 @@ End Property
 
 Public Property Set Query(ByRef Value As RallyQuery)
     Set prvQuery = Value
+    prvHasQuery = True
 End Property
 
 ''''''''''''''''''''''
@@ -97,6 +100,7 @@ Public Property Let pageSize(Value As Integer)
 End Property
 ''''''''''''''''''''''
 ' Project property
+' This should be a ref of the form "/project/12345678910"
 ''''''''''''''''''''''
 Public Property Get Project() As String
     Project = prvProject
@@ -129,6 +133,7 @@ End Property
 
 ''''''''''''''''''''''
 ' Workspace property
+' This should be a ref of the form "/workspace/12345678911"
 ''''''''''''''''''''''
 Public Property Get Workspace() As String
     Workspace = prvWorkspace
@@ -141,10 +146,17 @@ End Property
 ''''''''''''''''''''''
 ' Start property
 ''''''''''''''''''''''
-Public Property Get Start() As Long
-    Start = prvStart
+Public Property Get start() As Long
+    start = prvStart
 End Property
 
-Public Property Let Start(Value As Long)
+Public Property Let start(Value As Long)
     prvStart = Value
 End Property
+
+''''''''''''''''''''''''''''
+' HasQuery function
+''''''''''''''''''''''
+Public Function HasQuery()
+    HasQuery = prvHasQuery
+End Function
