@@ -45,6 +45,8 @@ Barely. Pre-alpha. Right now this is nothing more than a proof-of-concept for Qu
 
 ![Needed References](https://raw.githubusercontent.com/markwilliams970/RallyRestToolkitForVBA/master/screenshots/screenshot6.png)
 
+8. [Video showing Sample Query](http://www.screencast.com/t/OGxiqMAXxi5 "Example Video") from Worksheet (illustrating code in GetStoriesForm).
+
 ## Code Structure
 
 The core functionality is contained in the Class Modules that are accessible from the VBA Editor for the Excel Worksheet:
