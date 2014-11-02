@@ -79,7 +79,7 @@ The code that accomplishes the updating is found within the "UpdateDefectsForm" 
 
 ## To Do
 
-There's lots still to do with this to make this toolkit robust. Overall, error-checking and handling needs to be a lot more thorough everywhere. There are probably a lot of situations where text that resides within Excel cells will require more complete encoding and escaping before uploading to Rally, in order to get things to work right. This is alpha-level code...so just be aware.
+There's plenty still to do with this to make this toolkit robust. Overall, error-checking and handling needs to be a lot more thorough everywhere. There are probably a number of situations where text that resides within Excel cells will require more complete encoding and escaping before uploading to Rally, in order to get things to work right. This is alpha-level code...so just be aware.
 
 ## Will this work with Excel for Macs?
 
