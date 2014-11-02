@@ -461,7 +461,8 @@ Private Function CalculateNumberOfPages(resultCount As Long, pageSize As Long)
         lastPage = 1
     End If
     
-    numberPages = (resultCount / pageSize) + lastPage
+    ' Use forward slash: \ to force integer division
+    numberPages = (resultCount \ pageSize) + lastPage
     CalculateNumberOfPages = numberPages
 
 End Function
