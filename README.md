@@ -12,7 +12,7 @@ Why not? VBA is a useful toolkit for automating processes in Microsoft Excel, fo
 Excellent question. VBA may be quite slow and inefficient for accessing large amounts of data. It's not asynchronous, and can be a clumsy way to get data into/out of Rally in large volumes. But for small datasets, it could be convenient.
 
 ##How functional is this toolkit at this point in time?
-Barely. Pre-alpha. Right now this is nothing more than a proof-of-concept for Querying Rally and Creating Rally Artifacts from VBA code. More to come though!
+Alpha-level code. Right now this is basically a proof-of-concept for Querying Rally and Creating/Updating Rally Artifacts from VBA code. More to come though!
 
 ## Getting started
 
@@ -61,13 +61,25 @@ The code behind the "Get Stories" button in the worksheet is contained within th
 
 ![Sample Code](https://raw.githubusercontent.com/markwilliams970/RallyRestToolkitForVBA/master/screenshots/screenshot8.png)
 
-There is also an example showing how to use the RallyRestToolkitForVBA toolkit to Create Defects, within the "Examples" module. This sample isn't hooked up to any UI Components.
+There is an example showing how to use the RallyRestToolkitForVBA toolkit to Create Defects. The data and upload button are on the "CreateDefects" Worksheet.
 
-![Create Defects Example](https://raw.githubusercontent.com/markwilliams970/RallyRestToolkitForVBA/master/screenshots/screenshot9.png)
+![CreateDefects](https://raw.githubusercontent.com/markwilliams970/RallyRestToolkitForVBA/master/screenshots/screenshot10.png)
+
+ The code that accomplishes the upload is found within the "UploadDefectsForm" module.
+
+![UploadDefectsForm](https://raw.githubusercontent.com/markwilliams970/RallyRestToolkitForVBA/master/screenshots/screenshot11.png)
+
+There's an example data and button for Updating Defects present on the "UpdateDefects" Worksheet Tab:
+
+![UpdateDefects](https://raw.githubusercontent.com/markwilliams970/RallyRestToolkitForVBA/master/screenshots/screenshot12.png)
+
+The code that accomplishes the updating is found within the "UpdateDefectsForm" Module:
+
+![UpdateDefectsForm](https://raw.githubusercontent.com/markwilliams970/RallyRestToolkitForVBA/master/screenshots/screenshot13.png)
 
 ## To Do
 
-There's lots still to do with this to make this toolkit anything close to useful. There's the U/D of CRUD (Update and Delete) still to do. Overall, error-checking and handling needs to be a lot more robust throughout. There are probably a lot of situations where text that resides within Excel cells will require more thorough encoding and escaping before uploading to Rally, in order to get things to work right. This is alpha-level code...so just be aware.
+There's lots still to do with this to make this toolkit robust. Overall, error-checking and handling needs to be a lot more thorough everywhere. There are probably a lot of situations where text that resides within Excel cells will require more complete encoding and escaping before uploading to Rally, in order to get things to work right. This is alpha-level code...so just be aware.
 
 ## Will this work with Excel for Macs?
 

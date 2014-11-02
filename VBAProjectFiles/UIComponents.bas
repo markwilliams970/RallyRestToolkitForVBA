@@ -4,3 +4,14 @@ Sub GetStories_Click()
     GetStoriesForm.Show
 
 End Sub
+Sub UploadDefects_Click()
+
+    UploadDefectsForm.Show
+
+End Sub
+
+Sub UpdateDefects_Click()
+
+    UpdateDefectsForm.Show
+
+End Sub

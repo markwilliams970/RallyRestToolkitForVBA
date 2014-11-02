@@ -7,7 +7,7 @@ Attribute VB_GlobalNameSpace = False
 Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = False
 Attribute VB_Exposed = False
-    ' Class Attributes
+' Class Attributes
 
 Private prvStartIndex As Long
 Private prvTotalResultCount As Long
@@ -67,7 +67,7 @@ Public Sub AddRawResults(ByRef Value As Object)
     Dim theseResults As Object
     Dim K As Variant
     Dim keys As Variant
-    Dim blah As String
+
     Set QueryResultCollection = Value("QueryResult")
     Set theseResults = QueryResultCollection("Results")
     

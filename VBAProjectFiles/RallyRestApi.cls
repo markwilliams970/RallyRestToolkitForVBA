@@ -88,7 +88,7 @@ Public Function findWorkspace(WorkspaceName As String) As Object
     pageSize = 20
     Set resultCollection = queryResponse("QueryResult")
     myTotalResultCount = resultCollection("TotalResultCount")
-    nPages = myTotalResultCount / pageSize
+    nPages = CalculateNumberOfPages(myTotalResultCount, pageSize)
     
     ' If we have multiple pages, page through and collect entire result set
     If nPages > 1 Then
@@ -151,7 +151,7 @@ Public Function findProject(RallyWorkspace As Object, ProjectName As String) As 
     pageSize = 20
     Set resultCollection = queryResponse("QueryResult")
     myTotalResultCount = resultCollection("TotalResultCount")
-    nPages = myTotalResultCount / pageSize
+    nPages = CalculateNumberOfPages(myTotalResultCount, pageSize)
     
     ' If we have multiple pages, page through and collect entire result set
     If nPages > 1 Then
@@ -191,7 +191,7 @@ Public Function Query(Value As RallyRequest) As RallyQueryResult
     Dim queryUrl As String
     Dim myRallyRequest As RallyRequest
     Dim myQueryResult As RallyQueryResult
-    Dim myTotalResultCount As Long, nPages As Long, i As Long
+    Dim myTotalResultCount As Long, nPages As Long, i As Long, remainder As Long, lastPage As Long
     
     ' Set private reference to RallyRequest
     Set myRallyRequest = Value
@@ -209,7 +209,7 @@ Public Function Query(Value As RallyRequest) As RallyQueryResult
     ' Find out how many pages are in result set
     Set resultCollection = queryResponse("QueryResult")
     myTotalResultCount = resultCollection("TotalResultCount")
-    nPages = myTotalResultCount / myRallyRequest.pageSize
+    nPages = CalculateNumberOfPages(myTotalResultCount, myRallyRequest.pageSize)
     
     ' If we have multiple pages, page through and collect entire result set
     If nPages > 1 Then
@@ -376,35 +376,92 @@ Private Function buildCreateUrl(ArtifactType As String) As String
     buildCreateUrl = myRallyCreateUrl
 End Function
 
-Public Function Update(ArtifactRef As String, Value As RallyObject) As RallyOperationResult
+Private Function buildUpdateUrl(ArtifactType As String, ArtifactObjectID As String) As String
     Dim myRallyUpdateUrl As String
-    Dim myRallyObject, myRallyFields As Object
-    Dim myUpdateFields As Object
+    
+    myRallyUpdateUrl = webServiceUrl() & "/" & ArtifactType & "/" & ArtifactObjectID
+    buildUpdateUrl = myRallyUpdateUrl
+End Function
+
+Public Function Update(ArtifactType As String, ArtifactObjectID As String, Value As RallyObject) As RallyOperationResult
+    Dim myRallyUpdateUrl As String
+    Dim myRallyObject, myUpdateObject As Object
     Dim myUpdateJSON As String, myURLEncodedJSON As String, _
         authFailure As String, myErrorString As String
     Dim myUpdateResponse As Object
     Dim myUpdateResult As RallyOperationResult
     Dim myUpdateErrors As Object
-    
+        
     Set myRallyObject = Value.JSONObject
     
-    ' need to work out the "double-wrapper"
-    ' i.e., we'll receive fields as key value pairs only
-    ' But these will need to be wrapped up
+    ' i.e., we receive fields as key value pairs only. These are wrapped up
     ' in the artifact type JSON: {"task":{"Name":"My Task"}}
     
-    Set myRallyObject = CreateObject("Scripting.Dictionary")
-    myRallyObject.Add key:=ArtifactType, Item:=myRallyObject
+    Set myUpdateObject = CreateObject("Scripting.Dictionary")
+    myUpdateObject.Add key:=ArtifactType, Item:=myRallyObject
     
-    myUpdateJSON = JSON.toString(myRallyObject)
+    myUpdateJSON = JSON.toString(myUpdateObject)
     myURLEncodedJSON = URLEncode(myUpdateJSON)
     
-    ' TODO: BUILD UPDATE URL FUNCTION
-    ' myRallyUpdateUrl = buildUpdateUrl(ArtifactRef)
-
+    ' UPDATE URL FUNCTION
+    myRallyUpdateUrl = buildUpdateUrl(ArtifactType, ArtifactObjectID)
+    
+    Set myUpdateResponse = prvRallyConnection.rallyUpdatePOST(myRallyUpdateUrl, myUpdateJSON)
+        
+    ' Populate Result object
+    Set myUpdateResult = New RallyOperationResult
+    Set myUpdateResult.RawResult = myUpdateResponse
+    
+    ' Check to see if we failed to authenticate - if so, re-authenticate and retry create
+    authFailure = "Not authorized to perform action: Invalid key"
+    
+    If myUpdateResult.WasSuccessful <> True Then
+        Set myUpdateErrors = myUpdateResult.Errors
+        myErrorString = ""
+        For Each thisError In myUpdateErrors
+            myErrorString = myErrorString & thisError
+        Next
+        If myErrorString = authFailure Then
+        
+            Set myUpdateResponse = Nothing
+            Set myUpdateResult = Nothing
+            
+            prvRallyConnection.Authenticate
+            
+            Set myUpdateResponse = prvRallyConnection.rallyUpdatePOST(myRallyUpdateUrl, myUpdateJSON)
+        
+            ' Populate Result object
+            Set myUpdateResult = New RallyOperationResult
+            Set myUpdateResult.RawResult = myUpdateResponse
+        End If
+    End If
+    
+    Set Update = myUpdateResult
+    
+    Set myRallyObject = Nothing
+    Set myUpdateObject = Nothing
+    Set myUpdateResponse = Nothing
+    Set myUpdateResult = Nothing
 
 End Function
 
 Private Function GetTypeFromRef(Ref As String)
+
+End Function
+
+Private Function CalculateNumberOfPages(resultCount As Long, pageSize As Long)
+    Dim numberPages As Long, remainder As Long, lastPage As Long
+    lastPage = 0
+    
+    ' Calculate remainder
+    remainder = resultCount Mod pageSize
+    
+    ' Add a page if we have a remainder
+    If remainder <> 0 Then
+        lastPage = 1
+    End If
+    
+    numberPages = (resultCount / pageSize) + lastPage
+    CalculateNumberOfPages = numberPages
 
 End Function

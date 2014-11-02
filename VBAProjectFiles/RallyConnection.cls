@@ -195,6 +195,44 @@ Public Function httpGET(fn As String, _
     Set oHttp = Nothing
 End Function
 
+Public Function httpDelete(fn As String, _
+        Optional authUser As String = vbNullString, _
+        Optional authPass As String = vbNullString, _
+        Optional accept As String = vbNullString, _
+        Optional isAuthRequest As Boolean) As String
+    pHtml = fn
+    Dim responseCookie As String, fullResponseHeaders As String
+    Dim oHttp As Object
+    Set oHttp = CreateObject("MSXML2.ServerXMLHTTP")
+    With oHttp
+        .Open "DELETE", pHtml, False
+    End With
+    If (authUser <> vbNullString) Then
+    ' need to do basic authentication
+    ' acknowledgement to http://pastie.org/1192157
+        oHttp.SetRequestHeader "Content-Type", "application/json"
+        oHttp.SetRequestHeader "Accept", "application/json"
+        oHttp.SetRequestHeader "Authorization", "Basic " + _
+            Base64Encode(authUser + ":" + authPass)
+        oHttp.SetRequestHeader "Connection", "Keep-Alive"
+    End If
+    
+    ' some times we need to set the accept header
+    If accept <> vbNullString Then
+        oHttp.SetRequestHeader "Accept", accept
+    End If
+    Call oHttp.Send("")
+    httpDelete = oHttp.responseText
+    pStatus = oHttp.Status
+    If isAuthRequest = True Then
+        fullResponseHeaders = oHttp.getAllResponseHeaders()
+        responseCookie = oHttp.getResponseHeader("set-cookie")
+        ' Save the session cookie
+        prvSessionCookie = getFullSessionCookie(fullResponseHeaders)
+    End If
+    Set oHttp = Nothing
+End Function
+
 Public Function rallyGET(fn As String) As Object
     Dim getResponse As String
     Dim getJSON As Object
@@ -223,6 +261,43 @@ Public Function rallyPOST(fn As String, workspaceRef As String, postData As Stri
     Set postResponseJSON = myJSON.parse(postResponse)
     Set rallyPOST = postResponseJSON
     Set postResponseJSON = Nothing
+End Function
+
+Public Function rallyUpdatePOST(fn As String, postData As String) As Object
+    Dim authenticatedPostURL As String
+    Dim postResponse As String
+    Dim postResponseJSON As Object
+    Dim myJSON As Object
+    
+    Set myJSON = New JSONLib
+    
+    ' Add Authentication information
+    authenticatedPostURL = AddAuthKey(fn)
+    
+    ' Add Workspace Ref
+    authenticatedPostURL = authenticatedPostURL
+   
+    postResponse = httpPost(authenticatedPostURL, postData)
+    Set postResponseJSON = myJSON.parse(postResponse)
+    Set rallyUpdatePOST = postResponseJSON
+    Set postResponseJSON = Nothing
+End Function
+
+Public Function rallyDelete(fn As String) As Object
+    Dim authenticatedDeleteURL As String
+    Dim deleteResponse As String
+    Dim deleteResponseJSON As Object
+    Dim myJSON As Object
+    
+    Set myJSON = New JSONLib
+    
+    ' Add Authentication information
+    authenticatedDeleteURL = AddAuthKey(fn)
+   
+    deleteResponse = httpPost(authenticatedDeleteURL)
+    Set deleteResponseJSON = myJSON.parse(deleteResponse)
+    Set rallyDelete = deleteResponseJSON
+    Set deleteResponseJSON = Nothing
 End Function
 
 Private Sub setSubBucketID()
@@ -260,17 +335,6 @@ Private Function AddAuthKey(fn As String) As String
     AddAuthKey = fn & "?key=" & prvSecurityToken
 End Function
 
-Public Function TestQuery() As Object
-
-    Dim myQueryUrl As String
-    Dim myResponse As Object
-    myQueryUrl = "https://rally1.rallydev.com/slm/webservice/" & _
-        prvWsapiVersion & "/hierarchicalrequirement?query=((FormattedID > " & addEscapedDoubleQuotes("US23") & ") AND (CreationDate > 2013-01-01))&fetch=Name,FormattedID,Description&workspace=&project=&pagesize=200"
-    ' Issue a GET request against the URL using specified credentials
-    myResponse = rallyGET(myQueryUrl)
-    TestQuery = myResponse
-     
-End Function
 ' https://gist.github.com/shimondoodkin/3398055
 Private Function getFullSessionCookie(responseHeaders As String) As String
     Dim strHeaders, hArr, kk, theCookie
