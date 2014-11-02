@@ -100,7 +100,7 @@ Public Function findWorkspace(WorkspaceName As String) As Object
             workspacesQueryUrl = workspacesRef & "?fetch=true&start=" & start
             
             ' Query Rally
-            Set queryResponse = prvRallyConnection.rallyGET(queryUrl)
+            Set queryResponse = prvRallyConnection.rallyGET(workspacesQueryUrl)
     
             ' Update Result object
             Call myQueryResult.AddRawResults(queryResponse)
@@ -163,7 +163,7 @@ Public Function findProject(RallyWorkspace As Object, ProjectName As String) As 
             projectsQueryUrl = projectsRef & "?fetch=true&start=" & start
             
             ' Query Rally
-            Set queryResponse = prvRallyConnection.rallyGET(queryUrl)
+            Set queryResponse = prvRallyConnection.rallyGET(projectsQueryUrl)
     
             ' Update Result object
             Call myQueryResult.AddRawResults(queryResponse)
