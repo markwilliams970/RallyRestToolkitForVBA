@@ -15,3 +15,8 @@ Sub UpdateDefects_Click()
     UpdateDefectsForm.Show
 
 End Sub
+Sub DeleteDefects_Click()
+
+    DeleteDefectsForm.Show
+
+End Sub

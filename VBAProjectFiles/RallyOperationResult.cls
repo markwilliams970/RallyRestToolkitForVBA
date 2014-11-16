@@ -77,6 +77,33 @@ Public Property Set RawResult(ByVal Value As Object)
     Set OperationResultCollection = Nothing
     
 End Property
+''''''''''''''''''''''
+' DeleteResults collection property
+' Delete OperationResult comes back without a _ref or Object
+' So we need to de-construct the response a bit differently
+''''''''''''''''''''''
+Public Property Set DeleteResult(ByVal Value As Object)
+    Dim OperationResultCollection As Object
+    Dim Errors As Object
+    Dim Warnings As Object
+    
+    Set prvRawResult = Value
+    Set OperationResultCollection = prvRawResult("OperationResult")
+    Set Errors = OperationResultCollection("Errors")
+    Set Warnings = OperationResultCollection("Warnings")
+    If Errors.Count = 0 Then
+        prvWasSuccessful = True
+    Else
+        Set prvErrors = Errors
+    End If
+    If Warnings.Count <> 0 Then
+        Set prvWarnings = Warnings
+    End If
+    
+    Set prvOperationResult = OperationResultCollection
+    Set OperationResultCollection = Nothing
+    
+End Property
 Public Property Get UpdatedItem() As Object
     Set UpdatedItem = prvUpdatedItem
 End Property

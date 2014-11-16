@@ -159,5 +159,3 @@ Public Sub UploadDefects(RallyUserName As String, RallyPassword As String, Rally
     MsgBox "Finished Uploading Defects To Rally"
 
 End Sub
-
-

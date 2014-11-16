@@ -1,4 +1,6 @@
 Attribute VB_Name = "ExportModules"
+''' Source:
+''' http://www.rondebruin.nl/win/s9/win002.htm
 Public Sub ExportModules()
     Dim bExport As Boolean
     Dim wkbSource As Excel.Workbook
@@ -174,4 +176,3 @@ Function DeleteVBAModulesAndUserForms()
             End If
         Next VBComp
 End Function
-

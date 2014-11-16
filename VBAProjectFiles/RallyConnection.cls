@@ -195,32 +195,17 @@ Public Function httpGET(fn As String, _
     Set oHttp = Nothing
 End Function
 
-Public Function httpDelete(fn As String, _
-        Optional authUser As String = vbNullString, _
-        Optional authPass As String = vbNullString, _
-        Optional accept As String = vbNullString, _
-        Optional isAuthRequest As Boolean) As String
+Public Function httpDelete(fn As String) As String
     pHtml = fn
     Dim responseCookie As String, fullResponseHeaders As String
     Dim oHttp As Object
     Set oHttp = CreateObject("MSXML2.ServerXMLHTTP")
     With oHttp
         .Open "DELETE", pHtml, False
+        .SetRequestHeader "Cookie", prvSessionCookie
+        .SetRequestHeader "Connection", "Keep-Alive"
     End With
-    If (authUser <> vbNullString) Then
-    ' need to do basic authentication
-    ' acknowledgement to http://pastie.org/1192157
-        oHttp.SetRequestHeader "Content-Type", "application/json"
-        oHttp.SetRequestHeader "Accept", "application/json"
-        oHttp.SetRequestHeader "Authorization", "Basic " + _
-            Base64Encode(authUser + ":" + authPass)
-        oHttp.SetRequestHeader "Connection", "Keep-Alive"
-    End If
     
-    ' some times we need to set the accept header
-    If accept <> vbNullString Then
-        oHttp.SetRequestHeader "Accept", accept
-    End If
     Call oHttp.Send("")
     httpDelete = oHttp.responseText
     pStatus = oHttp.Status
@@ -273,9 +258,6 @@ Public Function rallyUpdatePOST(fn As String, postData As String) As Object
     
     ' Add Authentication information
     authenticatedPostURL = AddAuthKey(fn)
-    
-    ' Add Workspace Ref
-    authenticatedPostURL = authenticatedPostURL
    
     postResponse = httpPost(authenticatedPostURL, postData)
     Set postResponseJSON = myJSON.parse(postResponse)
@@ -294,7 +276,7 @@ Public Function rallyDelete(fn As String) As Object
     ' Add Authentication information
     authenticatedDeleteURL = AddAuthKey(fn)
    
-    deleteResponse = httpPost(authenticatedDeleteURL)
+    deleteResponse = httpDelete(authenticatedDeleteURL)
     Set deleteResponseJSON = myJSON.parse(deleteResponse)
     Set rallyDelete = deleteResponseJSON
     Set deleteResponseJSON = Nothing

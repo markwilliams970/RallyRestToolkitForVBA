@@ -366,7 +366,6 @@ Public Function Create(ArtifactType As String, workspaceRef As String, Value As 
     Set myCreateResponse = Nothing
     Set myCreateResult = Nothing
 
-
 End Function
 
 Private Function buildCreateUrl(ArtifactType As String) As String
@@ -442,6 +441,52 @@ Public Function Update(ArtifactType As String, ArtifactObjectID As String, Value
     Set myUpdateObject = Nothing
     Set myUpdateResponse = Nothing
     Set myUpdateResult = Nothing
+
+End Function
+Public Function Delete(ArtifactType As String, ArtifactObjectID As String) As RallyOperationResult
+    Dim myRallyDeleteUrl As String
+    Dim authFailure As String, myErrorString As String
+    Dim myDeleteResponse As Object
+    Dim myDeleteResult As RallyOperationResult
+    Dim myDeleteErrors As Object
+    
+    ' DELETE URL FUNCTION
+    myRallyDeleteUrl = buildUpdateUrl(ArtifactType, ArtifactObjectID)
+    
+    Set myDeleteResponse = prvRallyConnection.rallyDelete(myRallyDeleteUrl)
+        
+    ' Populate Result object
+    Set myDeleteResult = New RallyOperationResult
+    Set myDeleteResult.DeleteResult = myDeleteResponse
+    
+    ' Check to see if we failed to authenticate - if so, re-authenticate and retry create
+    authFailure = "Not authorized to perform action: Invalid key"
+    
+    If myDeleteResult.WasSuccessful <> True Then
+        Set myDeleteErrors = myDeleteResult.Errors
+        myErrorString = ""
+        For Each thisError In myDeleteErrors
+            myErrorString = myErrorString & thisError
+        Next
+        If myErrorString = authFailure Then
+        
+            Set myDeleteResponse = Nothing
+            Set myDeleteResult = Nothing
+            
+            prvRallyConnection.Authenticate
+            
+            Set myDeleteResponse = prvRallyConnection.rallyDelete(myRallyDeleteUrl)
+        
+            ' Populate Result object
+            Set myDeleteResult = New RallyOperationResult
+            Set myDeleteResult.DeleteResult = myDeleteResponse
+        End If
+    End If
+    
+    Set Delete = myDeleteResult
+    
+    Set myDeleteResponse = Nothing
+    Set myDeleteResult = Nothing
 
 End Function
 

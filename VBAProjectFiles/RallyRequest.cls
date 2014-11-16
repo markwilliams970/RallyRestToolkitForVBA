@@ -12,7 +12,7 @@ Attribute VB_Exposed = False
 Private prvArtifactName As String
 Private prvFetch As String
 Private prvProjectScopeUp As Boolean, prvProjectScopeDown As Boolean
-Private prvPageSize As Integer
+Private prvPageSize As Integer, prvMaxPageSize As Integer
 Private prvRecordLimit As Long
 Private prvStart As Long
 Private prvOrder As String
@@ -26,8 +26,9 @@ Private Sub Class_Initialize()
     ' Default project scoping to flat
     prvProjectScopeUp = False
     prvProjectScopeDown = False
-    prvPageSize = 200
-    prvRecordLimit = 99999
+    prvMaxPageSize = 200
+    prvPageSize = prvMaxPageSize
+    prvRecordLimit = 100000
     prvStart = 1
     prvHasQuery = False
 End Sub
@@ -97,6 +98,9 @@ End Property
 
 Public Property Let pageSize(Value As Integer)
     prvPageSize = Value
+    If Value > prvMaxPageSize Then
+        prvPageSize = prvMaxPageSize
+    End If
 End Property
 ''''''''''''''''''''''
 ' Project property
